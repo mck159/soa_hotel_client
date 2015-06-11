@@ -1,0 +1,6 @@
+{% if redir %}
+    Zaloguj się przed wejściem na stronę.
+{% endif %}
+<form action="{%url 'register' %}" method="{{registerForm.method}}">{% csrf_token %}{{ registerForm.form }}
+    <input type="submit" value="Rejestruj" />
+</form>
