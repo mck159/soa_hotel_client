@@ -1,6 +1,25 @@
-{% if redir %}
-    Zaloguj się przed wejściem na stronę.
-{% endif %}
-<form action="{%url 'login' %}" method="{{loginForm.method}}">{% csrf_token %}{{ loginForm.form }}
-    <input type="submit" value="Zaloguj" />
+{% extends 'hotel/base_panel.html' %}
+{% load bootstrap3 %}
+{% block title %}
+Login
+{% endblock %}
+
+{% block panel_title %}
+<span class="glyphicon glyphicon-user"></span> Login
+{% endblock %}
+
+{% block panel_body %}
+<form action="{%url 'login' %}" method="{{loginForm.method}}">{% csrf_token %}
+    {% bootstrap_form loginForm.form %}
+    {% buttons %}
+    <button type="submit" class="btn btn-primary btn-block">
+        Sign in
+    </button>
+    {% endbuttons %}
+    Don't have account? <a href="{% url 'register' %}">Click here to register</a>
 </form>
+{% endblock %}
+
+
+
+

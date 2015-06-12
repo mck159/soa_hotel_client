@@ -6,7 +6,7 @@ def tokenRequired(func):
             return func(request)
         else:
             response = redirect('login')
-            response['Location'] += '?redirect=true'
+            response['Location'] += '?warnings=login_required'
             return response
         #return HttpResponse(args[0].session.__str__())
 

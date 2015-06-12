@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views import generic
 from .forms import LoginForm, RegisterForm
@@ -8,13 +8,16 @@ from django.conf import settings
 from .utils import tokenRequiredDecorator
 from . import objects
 import json
+from django.views.decorators.http import require_http_methods
 # Create your views here.
 
 @tokenRequiredDecorator.tokenRequired
+@require_http_methods(["GET"])
 def index(request):
-    #return HttpResponse(request.session.__str__())
-    return HttpResponse("Hello")
+    return render(request, 'hotel/index.html', {'info' : request.GET['info'] if 'info' in request.GET else None,
+                                                'warnings' : request.GET['warnings'] if 'warnings' in request.GET else None})
 
+@require_http_methods(["GET", "POST"])
 def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -23,23 +26,31 @@ def login(request):
             password = form.cleaned_data['password']
             url = '%slogin/in/%s/%s' % (settings.WEBSERVICE_URL, username, password)
             r = requests.post(url)
-            if username == 'maciek' and password == 'test':
+            if r.status_code == 200:
                 response = HttpResponse('logged in')
+                response = redirect('index')
+                response['Location'] += '?info=logged_in'
                 response.set_cookie("token", "OKI")
                 return response
+            elif r.status_code == 401:
+                loginForm = {"form" : LoginForm(initial=request.POST), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
+                return render(request, 'hotel/login.html', {'loginForm' : loginForm, 'warnings' : 'Wrong username/password provided'})
             else:
-                return HttpResponse('unauthorized', status=401)
-        return HttpResponse("not ok")
-
-
-
-        return HttpResponse(settings.WEBSERVICE_URL)
+                loginForm = {"form" : LoginForm(initial=request.POST), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
+                return render(request, 'hotel/login.html', {'loginForm' : loginForm, 'warnings' : 'Something went wrong'})
+        loginForm = {"form" : LoginForm(initial=request.POST), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
+        return render(request, 'hotel/login.html', {'loginForm' : loginForm, 'warnings' : 'Something went wrong'})
     else:
-        if 'redirect' in request.GET and request.GET['redirect'] == 'true':
-            redir = True
+        warnings = None
+        info = None
+        if 'warnings' in request.GET:
+            warnings = request.GET['warnings'] if 'warnings' in request.GET else None
+        if 'info' in request.GET:
+            info = request.GET['info'] if 'info' in request.GET else None
         loginForm = {"form" : LoginForm(), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
-    return render(request, 'hotel/login.html', {'loginForm' : loginForm, 'redir' : True})
+        return render(request, 'hotel/login.html', {'loginForm' : loginForm, 'warnings' : warnings, 'info' : info})
 
+@require_http_methods(["GET", "POST"])
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -48,7 +59,8 @@ def register(request):
             password2 = form.cleaned_data['password2']
             try:
                 if password != password2:
-                    raise ValueError('Passwords not match')
+                    registerForm = {"form" : RegisterForm(initial=request.POST), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
+                    return render(request, 'hotel/register.html', {'registerForm' : registerForm, 'warnings' : "Passwords not match"})
                 url = '%sregistration/account' % (settings.WEBSERVICE_URL)
                 # deserialize
                 account = {}
@@ -71,10 +83,18 @@ def register(request):
                 data = json.dumps(account)
 
                 r = requests.post(url, data=data ,headers={"Content-Type" : "application/json"})
-                return HttpResponse('Dobrze wypelnione')
+                response = redirect('login')
+                response['Location'] += '?info=registered'
+                return response
             except ValueError as e:
                 return HttpResponse(e)
-        return HttpResponse("Wypełnij wszystkie pola")
+        registerForm = {"form" : RegisterForm(initial=request.POST), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
+        return render(request, 'hotel/register.html', {'registerForm' : registerForm, 'warnings' : "Something went wrong"})
     else:
         registerForm = {"form" : RegisterForm(), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
         return render(request, 'hotel/register.html', {'registerForm' : registerForm})
+
+@tokenRequiredDecorator.tokenRequired
+@require_http_methods(["GET"])
+def hotels(request):
+    return HttpResponse("TEST")
