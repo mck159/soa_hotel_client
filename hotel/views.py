@@ -1,16 +1,21 @@
 from datetime import date
+import json
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.views import generic
-from .forms import LoginForm, RegisterForm, ReservationForm
-from requests import Request
 import requests
 from django.conf import settings
+from django.views.decorators.http import require_http_methods
+
+from .forms import LoginForm, RegisterForm, ReservationForm
 from hotel.utils import utils
 from .utils import tokenRequiredDecorator
-from . import objects
-import json
-from django.views.decorators.http import require_http_methods
+
+
+
+
+
+
 # Create your views here.
 
 @tokenRequiredDecorator.tokenRequired
@@ -110,6 +115,7 @@ def hotels(request):
     response['Location'] += '?warnings=login_required'
     return response
 
+@tokenRequiredDecorator.tokenRequired
 @require_http_methods(["GET"])
 def rooms(request, hotel_id):
     token = request.COOKIES.get('token')
@@ -129,7 +135,8 @@ def roomAvailability(request, hotel_id, room_id):
             reservation = {}
             reservation['startDate'] = reservationArray[0]
             reservation['endDate'] = reservationArray[1]
-            reservation['roomId'] = room_id
+            reservation['hotelId'] = hotel_id
+            reservation['roomTypeId'] = room_id
             reservation['discountId'] = None
             reservation['accountId'] = request.COOKIES.get('account')
             token = request.COOKIES.get('token')

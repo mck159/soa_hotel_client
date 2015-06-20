@@ -10,7 +10,7 @@
         .on('click.rs.jquery.bootgrid', function(e, columns, row) {
             console.log(row.id);
             var url = "{% url 'roomAvailabilty' hotel_id 0 %}";
-            window.location.href = url.replace('0', row.id);
+            window.location.href = url.replace('/0/', '/' + row.id + '/');
         });
     });
 </script>
