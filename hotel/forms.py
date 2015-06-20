@@ -18,3 +18,6 @@ class RegisterForm(forms.Form):
     country = forms.CharField(label='Country', max_length=20)
     password = forms.CharField(label='Password', max_length=40, widget=forms.PasswordInput())
     password2 = forms.CharField(label='Repeat password', max_length=40, widget=forms.PasswordInput())
+
+class ReservationForm(forms.Form):
+    reservationDates = forms.CharField(label='wybierz terminy rezerwacji', widget=forms.TextInput(attrs={'readonly':'readonly'}))

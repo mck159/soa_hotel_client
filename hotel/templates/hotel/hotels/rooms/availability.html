@@ -1,0 +1,79 @@
+{% load bootstrap3 %}
+{% load staticfiles %}
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'datepicker/humanity.datepick.css' %}">
+    <title>{% block title %}{% endblock %}</title>
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="{% static 'datepicker/jquery.plugin.min.js' %}"></script>
+    <script src="{% static 'datepicker/jquery.datepick.min.js' %}"></script>
+    <script src="{% static 'datepicker/jquery.datepick-pl.js' %}"></script>
+    <script>
+        $(function() {
+            var dates = {{ availabilities|safe }};
+            $('#id_reservationDates').datepick({
+                    dateFormat: 'yyyy-mm-dd',
+                    showTrigger: '<button type="button" class="trigger">' +
+    '<img src="{% static 'datepicker/calendar.gif' %}" alt="Popup"></button>',
+                    rangeSelect: true,
+                    minDate: new Date(),
+                    onDate: function(date) {
+                        var str = $.datepick.formatDate('yyyy-mm-dd', date);
+                        return {selectable: (dates.indexOf(str) != -1)};
+                    }
+                }
+            );
+        });
+    </script>
+</head>
+
+<body>
+<div class="container">
+    <div class="row">
+        <div>
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h1>Index</h1>
+                </div>
+                <div class="panel-body">
+                    {% if warnings %}
+                        <div class="alert alert-warning">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            <strong>{{warnings}}</strong>
+                        </div>
+                    {% endif %}
+                    {% if info %}
+                        <div class="alert alert-info">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            <strong>{{info}}</strong>
+                        </div>
+                    {% endif %}
+                    <table>
+                        <tr>
+                            <th>Od</th>
+                            <th>Do</th>
+                        </tr>
+                    {% for availability in availabilities%}
+                        <tr>
+                            <td>{{availability.from}}</td>
+                            <td>{{availability.to}}</td>
+                        </tr>
+                    {% endfor %}
+                    </table>
+                    <form method="{{reservationForm.method}}">{% csrf_token %}
+                        {% bootstrap_form reservationForm.form %}
+                        {% buttons %}
+                            <button type="submit" class="btn btn-primary btn-block">
+                                Rezerwuj
+                            </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
+            </div>
+    </div>
+</div>
+
+</body>
+</html>

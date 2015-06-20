@@ -1,13 +1,10 @@
 from django.shortcuts import redirect
 def tokenRequired(func):
-    def func_wrapper(request):
-        token = request.COOKIES['token']
-        if(token == 'OKI'):
-            return func(request)
-        else:
+    def func_wrapper(*args, **kwargs):
+        if not 'token' in args[0].COOKIES or not args[0].COOKIES['token']:
             response = redirect('login')
             response['Location'] += '?warnings=login_required'
             return response
-        #return HttpResponse(args[0].session.__str__())
+        return func(*args, **kwargs)
 
     return func_wrapper

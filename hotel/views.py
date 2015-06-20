@@ -1,10 +1,12 @@
+from datetime import date
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views import generic
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, ReservationForm
 from requests import Request
 import requests
 from django.conf import settings
+from hotel.utils import utils
 from .utils import tokenRequiredDecorator
 from . import objects
 import json
@@ -30,9 +32,10 @@ def login(request):
                 response = HttpResponse('logged in')
                 response = redirect('index')
                 response['Location'] += '?info=logged_in'
-                response.set_cookie("token", "OKI")
+                response.set_cookie("token", r.json()['token'])
+                response.set_cookie("account", r.json()['account']['id'])
                 return response
-            elif r.status_code == 401:
+            elif r.status_code in (400, 401):
                 loginForm = {"form" : LoginForm(initial=request.POST), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
                 return render(request, 'hotel/login.html', {'loginForm' : loginForm, 'warnings' : 'Wrong username/password provided'})
             else:
@@ -76,7 +79,7 @@ def register(request):
                 account['address']['street'] = form.cleaned_data['street']
                 account['address']['houseNumber']    = form.cleaned_data['houseNumber']
                 account['address']['city'] = form.cleaned_data['city']
-                account['address']['postalCode'] = form.cleaned_data['postalCode']
+                account['address']['postalCode'] = form.cleaned_data['postalCode'].replace('-', '')
                 account['address']['country'] = form.cleaned_data['country']
                 account['regulaminAccepted'] = True
 
@@ -88,13 +91,64 @@ def register(request):
                 return response
             except ValueError as e:
                 return HttpResponse(e)
-        registerForm = {"form" : RegisterForm(initial=request.POST), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
+        registerForm = {"form" : RegisterForm(initial=request.POST), "method" : "POST"}
         return render(request, 'hotel/register.html', {'registerForm' : registerForm, 'warnings' : "Something went wrong"})
     else:
-        registerForm = {"form" : RegisterForm(), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
+        registerForm = {"form" : RegisterForm(), "url" : request.get_full_path(), "method" : "POST"}
         return render(request, 'hotel/register.html', {'registerForm' : registerForm})
 
 @tokenRequiredDecorator.tokenRequired
 @require_http_methods(["GET"])
 def hotels(request):
-    return HttpResponse("TEST")
+    token = request.COOKIES.get('token')
+    url = '%shotel/hotels' % (settings.WEBSERVICE_URL)
+    r = requests.get(url, headers={'Token-Auth' : token})
+    if(r.status_code == 200):
+        data = json.loads(r.text    )
+        return render(request, 'hotel/hotels/list.html', {'hotels' : data, 'info' : 'test'})
+    response = redirect('login')
+    response['Location'] += '?warnings=login_required'
+    return response
+
+@require_http_methods(["GET"])
+def rooms(request, hotel_id):
+    token = request.COOKIES.get('token')
+    url = '%shotel/roomTypes/%s' % (settings.WEBSERVICE_URL, hotel_id)
+    r = requests.get(url, headers={'Token-Auth' : token})
+    if(r.status_code == 200):
+        data = json.loads(r.text)
+        return render(request, 'hotel/hotels/rooms/list.html', {'hotel_id' : hotel_id, 'rooms': data})
+
+@require_http_methods(["GET", "POST"])
+def roomAvailability(request, hotel_id, room_id):
+    token = request.COOKIES.get('token')
+    if request.method == 'POST':
+        form = ReservationForm(request.POST)
+        if form.is_valid():
+            reservationArray  = form.cleaned_data['reservationDates'].split(' - ')
+            reservation = {}
+            reservation['startDate'] = reservationArray[0]
+            reservation['endDate'] = reservationArray[1]
+            reservation['roomId'] = room_id
+            reservation['discountId'] = None
+            reservation['accountId'] = request.COOKIES.get('account')
+            token = request.COOKIES.get('token')
+            url = '%sreservation/reservation' % (settings.WEBSERVICE_URL)
+            jsonReservation = json.dumps(reservation)
+            r = requests.post(url, data=json.dumps(reservation) ,headers={'Token-Auth' : token, 'Content-Type' : 'application/json'})
+            if r.status_code == 200:
+                response = redirect('roomAvailabilty')
+                return response
+        else:
+            reservationForm = {"form" : ReservationForm(), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
+            return render(request, 'hotel/hotels/rooms/availability.html', {'hotel_id' : hotel_id, 'availabilities': data, "reservationForm" : reservationForm, "warnings" : "Something went wrong"})
+    else:
+        url = '%sreservation/hotel/%s/roomType/%s/termins?year=%d' % (settings.WEBSERVICE_URL, hotel_id, room_id, date.today().year)
+        r = requests.get(url, headers={'Token-Auth' : token})
+        if(r.status_code == 200):
+            data = json.loads(r.text)
+            availabilities = utils.datesFromRanges(data)
+        else:
+            return HttpResponse('test')
+        reservationForm = {"form" : ReservationForm(), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
+        return render(request, 'hotel/hotels/rooms/availability.html', {'hotel_id' : hotel_id, 'availabilities': availabilities, "reservationForm" : reservationForm})
