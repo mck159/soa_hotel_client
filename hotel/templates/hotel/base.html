@@ -1,5 +1,6 @@
 <html>
 <head>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <title>{% block title %}{% endblock %}</title>
     <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -17,10 +18,12 @@
             <div>
                 <ul class="nav navbar-nav">
                     <li><a href="{% url 'hotelList' %}">Hotels</a></li>
+                    <li><a href="{% url 'reservationList' %}">Reservations</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="{% url 'register' %}"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
                     <li><a href="{% url 'login' %}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                    <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
                 </ul>
             </div>
         </div>

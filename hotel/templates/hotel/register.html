@@ -1,7 +1,26 @@
 {% extends 'hotel/base_panel.html' %}
 {% load bootstrap3 %}
+{% load staticfiles %}
 {% block title %}
 Register
+{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'datepicker/humanity.datepick.css' %}">
+    <script src="{% static 'datepicker/jquery.plugin.min.js' %}"></script>
+    <script src="{% static 'datepicker/jquery.datepick.min.js' %}"></script>
+    <script src="{% static 'datepicker/jquery.datepick-pl.js' %}"></script>
+    <script>
+        $(function() {
+            $('#id_birthDate').datepick({
+                    dateFormat: 'yyyy-mm-dd',
+                    showTrigger: '<button type="button" class="trigger">' +
+    '<img src="{% static 'datepicker/calendar.gif' %}" alt="Popup"></button>',
+                    maxDate: new Date(),
+                }
+            );
+        });
+    </script>
 {% endblock %}
 
 {% block panel_title %}

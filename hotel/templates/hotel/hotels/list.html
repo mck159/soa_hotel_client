@@ -5,12 +5,22 @@
 <link rel="stylesheet" href="{% static 'bootgrid/jquery.bootgrid.min.css' %}">
 <script src="{% static 'bootgrid/jquery.bootgrid.min.js' %}"></script>
 <script>
+    function showRoom(roomId) {
+        var url = "{% url 'roomList' 0 %}";
+        window.location.href= url.replace('/0/', '/' + roomId + '/');
+    }
+
     $('document').ready(function() {
-        $('#list').bootgrid({caseSensitive : false})
-        .on('click.rs.jquery.bootgrid', function(e, columns, row) {
-            console.log(row.id);
-            var url = "{% url 'roomList' 0 %}";
-            window.location.href = url.replace('0', row.id);
+        $('#list').bootgrid(
+        {
+            caseSensitive : false,
+            formatters: {
+                "link": function (column, row)
+                {
+
+                    return "<button class='btn btn-default' type='button' onClick='showRoom(" + row.id + ")'>Lista pokoi</button>";
+                }
+            }
         });
     });
 </script>
@@ -27,6 +37,7 @@
                     <th data-column-id="Opis">Opis</th>
                     <th data-column-id="Kontakt">Kontakt</th>
                     <th data-column-id="Adres">Adres</th>
+                    <th data-formatter="link"></th>
                 </tr>
             </thead>
             <tbody>
@@ -37,6 +48,7 @@
                         <td>{{hotel.desc}}</td>
                         <td>{{hotel.contact.phone}} {{hotel.contact.mail}}</td>
                         <td>{{hotel.address.city}}<br />{{hotel.address.street}}</td>
+                        <td><button data-id="{{ hotel.id }}">List pokoi</button></td>
                     </tr>
                 {% endfor %}
             </tbody>
