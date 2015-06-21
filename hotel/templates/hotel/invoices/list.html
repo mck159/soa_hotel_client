@@ -15,10 +15,10 @@
         {
             caseSensitive : false,
             formatters: {
-                "link": function (column, row)
+                "download": function (column, row)
                 {
-
-                    return "<button class='btn btn-default' type='button' onClick='showRoom(" + row.id + ")'>Lista pokoi</button>";
+                    var url = "{% url 'invoice' 0 %}";
+                    return "<a class='btn btn-default pull-right target='_blank' type='button' href='" + url.replace('0', row.id) + "'>Podgląd</a><a class='btn btn-primary pull-right' type='button' href='" + url.replace('0', row.id) + "' download>Pobierz</a>";
                 }
             }
         });
@@ -28,32 +28,26 @@
 
 {% block heading %}Hotel's list{% endblock %}
 {% block content %}
-    {% if hotels %}
+    {% if invoices %}
         <table id="list" class="table table-condensed table-hover table-striped">
             <thead>
                 <tr>
                     <th data-column-id="id" data-visible="false">Id</th>
                     <th data-column-id="Nazwa" data-order="asc">Nazwa</th>
-                    <th data-column-id="Opis">Opis</th>
-                    <th data-column-id="Kontakt">Kontakt</th>
-                    <th data-column-id="Adres">Adres</th>
-                    <th data-formatter="link"></th>
+                    <th data-column-id="Download" data-formatter="download">fda</th>
                 </tr>
             </thead>
             <tbody>
-                {% for hotel in hotels %}
+                {% for invoice in invoices %}
                     <tr>
-                        <td>{{hotel.id}}</td>
-                        <td>{{hotel.name}}</td>
-                        <td>{{hotel.desc}}</td>
-                        <td>{{hotel.contact.phone}} {{hotel.contact.mail}}</td>
-                        <td>{{hotel.address.city}}<br />{{hotel.address.street}}</td>
-                        <td><button data-id="{{ hotel.id }}">List pokoi</button></td>
+                        <td>{{invoice.id}}</td>
+                        <td>{{invoice.name}}</td>
+                        <td data-formatter="download"></td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
-        Brak hoteli
+        Brak faktury
     {% endif %}
 {% endblock %}

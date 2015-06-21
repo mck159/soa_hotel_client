@@ -14,6 +14,8 @@ urlpatterns = [
     url(r'hotel/reservations$', views.reservations, name='reservationList'),
     url(r'hotel/reservations/(?P<reservation_id>[0-9]+)/complaint$', views.complaint, name='complaint'),
     url(r'invoices/$', views.invoices, name='invoiceList'),
-    url(r'payments/$', views.payments, name='paymentList')
+    url(r'invoice/(?P<invoice_id>[0-9]+)$', views.invoice, name='invoice'),
+    url(r'payments/$', views.payments, name='paymentList'),
+    url(r'payments/(?P<payment_id>[0-9]+)/pay$', views.paymentPay, name='paymentPay')
 ]
 

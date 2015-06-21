@@ -21,3 +21,7 @@ class RegisterForm(forms.Form):
 
 class ReservationForm(forms.Form):
     reservationDates = forms.CharField(label='wybierz terminy rezerwacji', widget=forms.TextInput())
+
+class PaymentForm(forms.Form):
+    type = forms.ChoiceField(choices=[("cardNo", "cardNo"), ("bankName", "bankName")], widget=forms.RadioSelect(), initial="cardNo")
+    value = forms.CharField(label='Nazwa banku lub numer karty kredytowej', widget=forms.TextInput())

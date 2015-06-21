@@ -7,7 +7,7 @@ import requests
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 
-from .forms import LoginForm, RegisterForm, ReservationForm
+from .forms import LoginForm, RegisterForm, ReservationForm, PaymentForm
 from hotel.utils import utils
 from .utils import tokenRequiredDecorator
 
@@ -217,28 +217,55 @@ def invoices(request):
     account = request.COOKIES.get('account')
     url = '%sinvoices/user/%s' % (settings.WEBSERVICE_URL, account)
     r = requests.get(url, headers={'Token-Auth' : token, 'Content-Type' : 'application/json; utf-8'})
-    return HttpResponse(status=r.status_code)
+    invoices = json.loads(r.text)
+    invoicesList = [{'id' : invoice['id'], 'name' : invoice['invoiceName']} for invoice in invoices]
+    return render(request, 'hotel/invoices/list.html', {'invoices' : invoicesList, 'info' : None, 'warnings' : None})
+
+@tokenRequiredDecorator.tokenRequired
+@require_http_methods(["GET"])
+def invoice(request, invoice_id):
+    token = request.COOKIES.get('token')
+    url = '%sinvoices/%s' % (settings.WEBSERVICE_URL, invoice_id)
+    r = requests.get(url, headers={'Token-Auth' : token, 'Content-Type' : 'application/pdf'})
+    f = open('/tmp/output', 'wb')
+    f.write(r._content)
+    f.close()
+    return HttpResponse(r._content, content_type='application/pdf')
 
 @tokenRequiredDecorator.tokenRequired
 @require_http_methods(["GET"])
 def payments(request):
+    warnings = request.GET['warnings'] if 'warnings' in request.GET else None
+    info = request.GET['info'] if 'info' in request.GET else None
     token = request.COOKIES.get('token')
     account = request.COOKIES.get('account')
     url = '%spayment/%s' % (settings.WEBSERVICE_URL, account)
     r = requests.get(url, headers={'Token-Auth' : token, 'Content-Type' : 'application/json; utf-8'})
-    payments = json.loads(r.text)
-    paymentsList = []
-    for payment in payments:
-        paym = {}
-        paym['id'] = payment['reservation']['id']
-        paym['room'] = payment['reservation']['room']['roomType']['name']
-        paym['hotel'] = payment['reservation']['room']['hotel']['name']
-        paym['from'] = datetime.fromtimestamp(payment['reservation']['startDate'] / 1000).strftime('%Y-%m-%d')
-        paym['to'] = datetime.fromtimestamp(payment['reservation']['endDate'] / 1000).strftime('%Y-%m-%d')
-        paym['status'] = payment['status']
-        paym['dueDate'] = payment['dueDate']
-        paym['cost'] = payment['grossCost']
-        paymentsList.append(paym)
+    if r.status_code == 200:
+        payments = json.loads(r.text)
+        paymentsList = []
+        for payment in payments:
+            paym = {}
+            paym['id'] = payment['id']
+            paym['room'] = payment['reservation']['room']['roomType']['name']
+            paym['hotel'] = payment['reservation']['room']['hotel']['name']
+            paym['from'] = datetime.fromtimestamp(payment['reservation']['startDate'] / 1000).strftime('%Y-%m-%d')
+            paym['to'] = datetime.fromtimestamp(payment['reservation']['endDate'] / 1000).strftime('%Y-%m-%d')
+            paym['status'] = payment['status']
+            paym['dueDate'] = payment['dueDate']
+            paym['cost'] = payment['grossCost']
+            paymentsList.append(paym)
 
-    return render(request, 'hotel/payments/list.html', {'payments' : paymentsList, 'info' : None, 'warnings' : None})
+        return render(request, 'hotel/payments/list.html', {'payments' : paymentsList, 'paymentForm' : PaymentForm(), 'info' : info, 'warnings' : warnings})
+    return HttpResponse(status=r.status_code)
+
+@tokenRequiredDecorator.tokenRequired
+@require_http_methods(["POST"])
+def paymentPay(request, payment_id):
+    token = request.COOKIES.get('token')
+    account = request.COOKIES.get('account')
+    paymentType = request.POST['type']
+    paymentValue = request.POST['value']
+    url = '%spayment/%s/%s/pay?%s=%s' % (settings.WEBSERVICE_URL, account, payment_id, 'credit_card' if paymentType == 'cardNo' else 'transfer', paymentValue)
+    r = requests.post(url, headers={'Token-Auth' : token})
     return HttpResponse(status=r.status_code)
