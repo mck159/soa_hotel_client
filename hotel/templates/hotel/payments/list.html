@@ -48,16 +48,17 @@
                 {
                     var buttonDisabled = false;
                     var buttonClass = '';
-                    if(row.status = 'OVERDUE') {
+                    console.log(row);
+                    if(row.Status == 'OVERDUE') {
                         buttonClass = 'btn-danger';
-                    } else if(row.status = 'PAID') {
+                    } else if(row.Status== 'PAID') {
                         buttonClass = 'btn-success';
                         buttonDisabled = true;
-                    } else if(row.status = 'UNPAID') {
+                    } else if(row.Status == 'UNPAID') {
                         buttonClass = 'btn-warning';
                     }
 
-                    return "<button class='btn " + buttonClass + "' type='button' onClick='showConfirm(" + row.id + ")'"+ (buttonDisabled ? 'disabled' : '') + ">" + row.status + "</button>";
+                    return "<div class='text-center'><button class='btn " + buttonClass + "' type='button' onClick='showConfirm(" + row.id + ")'"+ (buttonDisabled ? 'disabled' : '') + ">" + row.Status + "</button></div>";
                 }
             }
         });
