@@ -47,18 +47,22 @@
                 "status": function (column, row)
                 {
                     var buttonDisabled = false;
+                    var glyphIcon = '';
                     var buttonClass = '';
                     console.log(row);
                     if(row.Status == 'OVERDUE') {
                         buttonClass = 'btn-danger';
+                        glyphIcon = 'alert';
                     } else if(row.Status== 'PAID') {
                         buttonClass = 'btn-success';
+                        glyphIcon = 'ok-sign';
                         buttonDisabled = true;
                     } else if(row.Status == 'UNPAID') {
                         buttonClass = 'btn-warning';
+                        glyphIcon = 'plus';
                     }
 
-                    return "<div class='text-center'><button class='btn " + buttonClass + "' type='button' onClick='showConfirm(" + row.id + ")'"+ (buttonDisabled ? 'disabled' : '') + ">" + row.Status + "</button></div>";
+                    return "<div class='text-center'><button class='btn " + buttonClass + "' type='button' onClick='showConfirm(" + row.id + ")'"+ (buttonDisabled ? 'disabled' : '') + ">" + "<span class='glyphicon glyphicon-" + glyphIcon + "'></span> " + row.Status + "</button></div>";
                 }
             }
         });

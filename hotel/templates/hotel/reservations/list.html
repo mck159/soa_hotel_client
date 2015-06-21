@@ -52,9 +52,9 @@
                 {
                     id = row.Id;
                     if(id in complaints) {
-                        return "<div class='text-center'><button data-complaint='" + complaints[id]['desc']+ "'class='btn btn-info' type='button' onClick='showComplaint(this)'>Show complaint</button></div>";
+                        return "<div class='text-center'><button data-complaint='" + complaints[id]['desc']+ "'class='btn btn-info' type='button' onClick='showComplaint(this)'><span class='glyphicon glyphicon-info-sign'></span> Show complaint</button></div>";
                     } else {
-                        return "<div class='text-center'><button class='btn btn-danger' type='button' onClick='complaint(" + row.Id + ")'>Make complaint</button></div>";
+                        return "<div class='text-center'><button class='btn btn-danger' type='button' onClick='complaint(" + row.Id + ")'><span class='glyphicon glyphicon-pencil'></span> Make complaint</button></div>";
                     }
                 }
             }

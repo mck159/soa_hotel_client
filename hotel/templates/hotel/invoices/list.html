@@ -18,7 +18,7 @@
                 "download": function (column, row)
                 {
                     var url = "{% url 'invoice' 0 %}";
-                    return "<a class='btn btn-default pull-right target='_blank' type='button' href='" + url.replace('0', row.id) + "'>Preview</a><a class='btn btn-primary pull-right' type='button' href='" + url.replace('0', row.id) + "' download>Download</a>";
+                    return "<a class='btn btn-default pull-right target='_blank' type='button' href='" + url.replace('0', row.id) + "'><span class='glyphicon glyphicon-file'></span> Preview</a><a class='btn btn-primary pull-right' type='button' href='" + url.replace('0', row.id) + "' download><span class='glyphicon glyphicon-download-alt'></span> Download</a>";
                 }
             }
         });
