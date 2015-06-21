@@ -1,0 +1,70 @@
+{% extends 'hotel/base_page.html' %}
+{% load static %}
+{% block title %}Hotel's list{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'bootgrid/jquery.bootgrid.min.css' %}">
+<script src="{% static 'bootgrid/jquery.bootgrid.min.js' %}"></script>
+<script>
+    $('document').ready(function() {
+        $('#list').bootgrid(
+        {
+            caseSensitive : false,
+            formatters: {
+                "status": function (column, row)
+                {
+                    var buttonDisabled = false;
+                    var buttonClass = '';
+                    if(row.status = 'OVERDUE') {
+                        buttonClass = 'btn-danger';
+                    } else if(row.status = 'PAID') {
+                        buttonClass = 'btn-success';
+                        buttonDisabled = true;
+                    } else if(row.status = 'UNPAID') {
+                        buttonClass = 'btn-warning';
+                    }
+
+                    return "<button class='btn " + buttonClass + "' type='button' onClick='showRoom(" + row.id + ")'"+ (buttonDisabled ? 'disabled' : '') +">" + row.status + "</button>";
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block heading %}Payments's list{% endblock %}
+{% block content %}
+    {% if payments %}
+        <table id="list" class="table table-condensed table-hover table-striped">
+            <thead>
+                <tr>
+                    <th data-column-id="id" data-visible="false">Id</th>
+                    <th data-column-id="Rezerwacja od" data-order="asc">Rezerwacja od</th>
+                    <th data-column-id="Rezerwacja do">Rezerwacja do</th>
+                    <th data-column-id="Pokój">Pokój</th>
+                    <th data-column-id="Koszt">Koszt</th>
+                    <th data-column-id="Termin">Termin</th>
+                    <th data-column-id="Cena">Cena</th>
+                    <th data-column-id="Status" data-formatter="status">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                    <tr>
+                        <td>{{payment.id}}</td>
+                        <td>{{payment.from}}</td>
+                        <td>{{payment.to}}</td>
+                        <td>{{payment.hotel}}/{{payment.room}}</td>
+                        <td>{{payment.cost}}</td>
+                        <td>{{payment.dueDate}}</td>
+                        <td>{{payment.cost}}</td>
+                        <td>{{payment.status}}</td>
+                        <td>{{hotel.address.city}}<br />{{hotel.address.street}}</td>
+                        <td><button data-id="{{ hotel.id }}">List pokoi</button></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        Brak płatności
+    {% endif %}
+{% endblock %}

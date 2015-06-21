@@ -186,6 +186,7 @@ def reservations(request):
     response['Location'] += '?warnings=login_required'
     return response
 
+@tokenRequiredDecorator.tokenRequired
 @require_http_methods(["GET", "POST"])
 def complaint(request, reservation_id):
     token = request.COOKIES.get('token')
@@ -208,3 +209,36 @@ def checkCompaint(request, reservation_id):
         return None
     complaintObj = json.loads(r.text)
     return {'id' : complaintObj['id'], 'description' : complaintObj['description'], 'reservation_id' : complaintObj['reservation']['id']}
+
+@tokenRequiredDecorator.tokenRequired
+@require_http_methods(["GET"])
+def invoices(request):
+    token = request.COOKIES.get('token')
+    account = request.COOKIES.get('account')
+    url = '%sinvoices/user/%s' % (settings.WEBSERVICE_URL, account)
+    r = requests.get(url, headers={'Token-Auth' : token, 'Content-Type' : 'application/json; utf-8'})
+    return HttpResponse(status=r.status_code)
+
+@tokenRequiredDecorator.tokenRequired
+@require_http_methods(["GET"])
+def payments(request):
+    token = request.COOKIES.get('token')
+    account = request.COOKIES.get('account')
+    url = '%spayment/%s' % (settings.WEBSERVICE_URL, account)
+    r = requests.get(url, headers={'Token-Auth' : token, 'Content-Type' : 'application/json; utf-8'})
+    payments = json.loads(r.text)
+    paymentsList = []
+    for payment in payments:
+        paym = {}
+        paym['id'] = payment['reservation']['id']
+        paym['room'] = payment['reservation']['room']['roomType']['name']
+        paym['hotel'] = payment['reservation']['room']['hotel']['name']
+        paym['from'] = datetime.fromtimestamp(payment['reservation']['startDate'] / 1000).strftime('%Y-%m-%d')
+        paym['to'] = datetime.fromtimestamp(payment['reservation']['endDate'] / 1000).strftime('%Y-%m-%d')
+        paym['status'] = payment['status']
+        paym['dueDate'] = payment['dueDate']
+        paym['cost'] = payment['grossCost']
+        paymentsList.append(paym)
+
+    return render(request, 'hotel/payments/list.html', {'payments' : paymentsList, 'info' : None, 'warnings' : None})
+    return HttpResponse(status=r.status_code)
