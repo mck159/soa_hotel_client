@@ -20,8 +20,8 @@ class RegisterForm(forms.Form):
     password2 = forms.CharField(label='Repeat password', max_length=255, widget=forms.PasswordInput())
 
 class ReservationForm(forms.Form):
-    reservationDates = forms.CharField(label='wybierz terminy rezerwacji', widget=forms.TextInput())
+    reservationDates = forms.CharField(label='Choose reservation dates', widget=forms.TextInput())
 
 class PaymentForm(forms.Form):
-    type = forms.ChoiceField(choices=[("cardNo", "cardNo"), ("bankName", "bankName")], widget=forms.RadioSelect(), initial="cardNo")
-    value = forms.CharField(label='Nazwa banku lub numer karty kredytowej', widget=forms.TextInput())
+    type = forms.ChoiceField(label="Payment type", choices=[("cardNo", "Credit card"), ("bankName", "Bank transfer")], widget=forms.RadioSelect(), initial="cardNo")
+    value = forms.CharField(label='Bank name or credit card numer', widget=forms.TextInput())

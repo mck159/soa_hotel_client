@@ -2,7 +2,7 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <title>{% block title %}{% endblock %}</title>
+    <title>SOA Hotel - {% block title %}{% endblock %}</title>
     <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     {% block head %}
@@ -20,7 +20,7 @@
                     <li><a href="{% url 'hotelList' %}">Hotels</a></li>
                     <li><a href="{% url 'reservationList' %}">Reservations</a></li>
                     <li><a href="{% url 'invoiceList' %}">Invoices</a></li>
-                    <li><a href="{% url 'paymentList' %}">Płatności</a></li>
+                    <li><a href="{% url 'paymentList' %}">Payments</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="{% url 'register' %}"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>

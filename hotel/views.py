@@ -70,7 +70,7 @@ def register(request):
             try:
                 if password != password2:
                     registerForm = {"form" : RegisterForm(initial=request.POST), "url" : settings.WEBSERVICE_URL, "method" : "POST"}
-                    return render(request, 'hotel/register.html', {'registerForm' : registerForm, 'warnings' : "Passwords not match"})
+                    return render(request, 'hotel/register.html', {'registerForm' : registerForm, 'warnings' : "Passwords don't match"})
                 url = '%sregistration/account' % (settings.WEBSERVICE_URL)
                 # deserialize
                 account = {}
@@ -94,7 +94,7 @@ def register(request):
 
                 r = requests.post(url, data=data ,headers={"Content-Type" : "application/json"})
                 response = redirect('login')
-                response['Location'] += '?info=registered'
+                response['Location'] += '?info=Account registered'
                 return response
             except ValueError as e:
                 return HttpResponse(e)
@@ -116,9 +116,7 @@ def hotels(request):
     if(r.status_code == 200):
         data = json.loads(r.text)
         return render(request, 'hotel/hotels/list.html', {'hotels' : data, 'info' : info, 'warnings' : warnings})
-    response = redirect('login')
-    response['Location'] += '?warnings=login_required'
-    return response
+    return HttpResponse(status=r.status_code)
 
 @tokenRequiredDecorator.tokenRequired
 @require_http_methods(["GET"])
@@ -182,9 +180,7 @@ def reservations(request):
                 complaints[complaint['reservation_id']] = {'id' : complaint['id'], 'desc' : complaint['description']}
             reservations.append(reservation)
         return render(request, 'hotel/reservations/list.html', {'reservations' : reservations, 'complaints' : complaints, 'info' : info, 'warnings' :warnings})
-    response = redirect('login')
-    response['Location'] += '?warnings=login_required'
-    return response
+    return HttpResponse(status=r.status_code)
 
 @tokenRequiredDecorator.tokenRequired
 @require_http_methods(["GET", "POST"])
@@ -252,7 +248,7 @@ def payments(request):
             paym['from'] = datetime.fromtimestamp(payment['reservation']['startDate'] / 1000).strftime('%Y-%m-%d')
             paym['to'] = datetime.fromtimestamp(payment['reservation']['endDate'] / 1000).strftime('%Y-%m-%d')
             paym['status'] = payment['status']
-            paym['dueDate'] = payment['dueDate']
+            paym['dueDate'] =datetime.fromtimestamp(payment['dueDate'] / 1000).strftime('%Y-%m-%d')
             paym['cost'] = payment['grossCost']
             paymentsList.append(paym)
 

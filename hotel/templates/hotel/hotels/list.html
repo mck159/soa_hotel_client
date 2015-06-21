@@ -1,6 +1,6 @@
 {% extends 'hotel/base_page.html' %}
 {% load static %}
-{% block title %}Hotel's list{% endblock %}
+{% block title %}Hotels{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{% static 'bootgrid/jquery.bootgrid.min.css' %}">
 <script src="{% static 'bootgrid/jquery.bootgrid.min.js' %}"></script>
@@ -18,7 +18,7 @@
                 "link": function (column, row)
                 {
 
-                    return "<button class='btn btn-default' type='button' onClick='showRoom(" + row.id + ")'>Lista pokoi</button>";
+                    return "<button class='btn btn-default' type='button' onClick='showRoom(" + row.id + ")'>Rooms</button>";
                 }
             }
         });
@@ -26,18 +26,18 @@
 </script>
 {% endblock %}
 
-{% block heading %}Hotel's list{% endblock %}
+{% block heading %}Hotels list{% endblock %}
 {% block content %}
     {% if hotels %}
         <table id="list" class="table table-condensed table-hover table-striped">
             <thead>
                 <tr>
                     <th data-column-id="id" data-visible="false">Id</th>
-                    <th data-column-id="Nazwa" data-order="asc">Nazwa</th>
-                    <th data-column-id="Opis">Opis</th>
-                    <th data-column-id="Kontakt">Kontakt</th>
-                    <th data-column-id="Adres">Adres</th>
-                    <th data-formatter="link"></th>
+                    <th data-column-id="Name" data-order="asc">Name</th>
+                    <th data-column-id="Description">Opis</th>
+                    <th data-column-id="Contect">Kontakt</th>
+                    <th data-column-id="Address">Address</th>
+                    <th data-formatter="link">Rooms</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,14 +46,16 @@
                         <td>{{hotel.id}}</td>
                         <td>{{hotel.name}}</td>
                         <td>{{hotel.desc}}</td>
-                        <td>{{hotel.contact.phone}} {{hotel.contact.mail}}</td>
-                        <td>{{hotel.address.city}}<br />{{hotel.address.street}}</td>
+                        <td>{{hotel.contact.phone}}, {{hotel.contact.mail}}</td>
+                        <td>{{hotel.address.city}}, {{hotel.address.street}}</td>
                         <td><button data-id="{{ hotel.id }}">List pokoi</button></td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
-        Brak hoteli
+        <div class="alert alert-warning">
+            <strong>No hotels</strong>
+        </div>
     {% endif %}
 {% endblock %}

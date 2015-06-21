@@ -1,7 +1,7 @@
 {% extends 'hotel/base_page.html' %}
 {% load static %}
 {% load bootstrap3 %}
-{% block title %}Hotel's list{% endblock %}
+{% block title %}Payments{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{% static 'bootgrid/jquery.bootgrid.min.css' %}">
 <script src="{% static 'bootgrid/jquery.bootgrid.min.js' %}"></script>
@@ -27,7 +27,7 @@
                 href = window.location.href;
                 var index = href.indexOf('?');
                 href = index != -1 ? href.substring(0, index) : href;
-                window.location.href = href + '?info=Płatność dokonana'
+                window.location.href = href + '?info=Payment proceeded'
             },
             error: function() {
                 alert('error');
@@ -66,7 +66,7 @@
 </script>
 {% endblock %}
 
-{% block heading %}Payments's list{% endblock %}
+{% block heading %}Payments list{% endblock %}
 {% block content %}
 <!-- modal -->
 <div class="modal fade" id="modalConfirmPayment" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -93,13 +93,13 @@
         <table id="list" class="table table-condensed table-hover table-striped">
             <thead>
                 <tr>
-                    <th data-column-id="id" data-visible="false">Id</th>
-                    <th data-column-id="Rezerwacja od" data-order="asc">Rezerwacja od</th>
-                    <th data-column-id="Rezerwacja do">Rezerwacja do</th>
-                    <th data-column-id="Pokój">Pokój</th>
-                    <th data-column-id="Koszt">Koszt</th>
-                    <th data-column-id="Termin">Termin</th>
-                    <th data-column-id="Status" data-formatter="status">Status</th>
+                    <th data-column-id="id" data-visible="false"  data-order="asc">Id</th>
+                    <th data-column-id="Reservation from">Reservation from</th>
+                    <th data-column-id="Reservation to">Reservation to</th>
+                    <th data-column-id="Room">Room</th>
+                    <th data-column-id="Cost">Cost</th>
+                    <th data-column-id="Due date">Due date</th>
+                    <th data-column-id="Status" data-formatter="status"></th>
                 </tr>
             </thead>
             <tbody>
@@ -119,6 +119,8 @@
             </tbody>
         </table>
     {% else %}
-        Brak płatności
+        <div class="alert alert-warning">
+            <strong>No payments</strong>
+        </div>
     {% endif %}
 {% endblock %}
